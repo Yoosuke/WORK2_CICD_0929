@@ -1,0 +1,27 @@
+name: Auto Create PR to Main
+
+on:
+  workflow_run:
+    workflows: ["Phoenix CI"]
+    types:
+      - completed
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+
+      - name: Create PR to main
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: "develop"
+          destination_branch: "main"
+          github_token: ${{ secrets.GH_TOKEN }}
+          pr_title: "デベロップからメインへの自動PR"
+          pr_body: "これは自動でだされたプルリクエストです。内容を確認し、問題なければマージしてください。"
+          pr_reviewer: Liam1230 # ここを適切なGitHubユーザー名に置き換えてください
